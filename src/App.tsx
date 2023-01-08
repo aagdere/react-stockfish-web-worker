@@ -4,7 +4,7 @@ import { reactDark, listStyle, gridStyle, inputStyle, listItemStyle } from './st
 import './App.css'
 import { Button, Grid, Input, List, ListItem, ListSubheader } from '@mui/material'
 
-const worker: Worker = new Worker('./src/stockfish_14/stockfish.js')
+const worker: Worker = new Worker('./src/stockfish_15/stockfish.js')
 
 export default function App() {
 
