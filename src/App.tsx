@@ -3,23 +3,46 @@ import logo from './logo.svg'
 import { reactDark, listStyle, gridStyle, inputStyle, listItemStyle } from './styles.js'
 import './App.css'
 import { Button, Grid, Input, List, ListItem, ListSubheader } from '@mui/material'
+import { fetchStockfish } from './StockfishFetcher'
+import { useEffect } from 'react'
 
-const worker: Worker = new Worker('./src/stockfish_15/stockfish.js')
+// const stockfish14: Worker = new Worker('./src/stockfish_14/stockfish.js', { type: 'module' })
+// const stockfish15: Worker = new Worker('./src/stockfish_15/stockfish.js', { type: 'module' })
+// const stockfishNnueWasm: Worker = new Worker('./src/stockfish_nnue_wasm/stockfish.js', { type: 'module' })
+// const worker: Worker = stockfish14
 
 export default function App() {
 
   const [sent, setSent] = useState<string[]>([])
   const [received, setReceived] = useState<string[]>([])
   const [command, setCommand] = useState<string>("")
+  const [stockfish, setStockfish] = useState<Worker | undefined>(undefined)
 
-    // listen for messages from the worker
-  worker.onmessage = function(event: MessageEvent<string>) {
-    setReceived(current => [...current, event.data])
-  }
+  useEffect(() => {
+
+    if (stockfish == undefined) {      
+      const init = async () => {
+          const stockfishWorker: Worker = await fetchStockfish();
+          setStockfish(stockfishWorker)
+
+          // listen for messages from the worker
+          const messageListener = (message: string) => {
+            setReceived(current => [...current, message])
+          }
+
+          (stockfishWorker as any).addMessageListener(messageListener)
+      }
+
+      init().catch(console.error)
+    }
+  }, [stockfish])
 
   const postMessage = (message: string): void => {
-    setSent(current => [...current, message])
-    worker.postMessage(message)
+    if (command.length > 0 && stockfish) {
+      stockfish.postMessage(message)
+      setSent(current => [...current, message])
+      console.log(stockfish)
+    }
   }
 
   return (
