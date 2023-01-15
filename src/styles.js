@@ -8,7 +8,7 @@ export const listStyle = {
   position: 'relative',
   overflow: 'auto',
   minHeight: 300,
-  maxHeight: 1000,
+  maxHeight: 300,
   '& ul': { padding: 0 },
   padding: 0,
   bgcolor: 'rgb(0,0,0,0.1)'
