@@ -2,12 +2,12 @@
 Simple example of using Stockfish.js in React
 
 ### Stockfish Version
-Currently on [nmrugg's Stockfish](https://github.com/nmrugg/stockfish.js) 14.1
+Currently on [nmrugg's Stockfish](https://github.com/nmrugg/stockfish.js) 15.0.0
 
 ![React Stockfish](/public/reactstockfish.png?raw=true "")
 
 ### `make build`
-Installs dependencies (node_modules)
+Installs dependencies (node_modules) and creates sym links for stockfish
 
 ### `make run`
 

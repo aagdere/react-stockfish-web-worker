@@ -1,4 +1,3 @@
-import { fetchStockfish } from './StockfishFetcher'
 import { Chess } from "chess.js";
 
 const fensForPgn = (pgn: string): string[] => {
@@ -48,17 +47,28 @@ const pgn = `
 const fens: string[] = fensForPgn(pgn)//.slice(0,20)
 
 export const analyzeFens = async (
+	stockfish: Worker,
 	depth: number,
+	maxFens: number,
+	nnueEnabled: boolean,
 	onAnalyzeFen: (completed: number, total: number) => void,
 	onComplete: (executionTimeSeconds: number, numOfFens: number) => void,
 	onPostMessage: (message: string) => void,
-	onReceiveMessage: (message: string) => void
+	setMessageListener: (messageListener: (message: string) => void) => void
 ): Promise<void> => {
-	const startTime: Date = new Date()
-	console.log("Inside analyzeFens")
-	console.log("Fetching stockfish...")
+	const numFensToAnalyze = Math.min(fens.length, maxFens)
+	const useBestMove: boolean = true
+	var startTime: Date
 
-	var stockfish: Worker = await fetchStockfish()
+	const finishAnalysisCondition: (message: string) => boolean = (message: string) => {
+		if (useBestMove){
+			return message.startsWith("bestmove")
+		} else {
+			return message.startsWith(`info depth ${depth}`) && message.includes(" cp ")
+		}
+	}
+
+	console.log("Inside analyzeFens")
 	
 	const postMessage = (message: string): void => {
 		onPostMessage(message)
@@ -71,34 +81,36 @@ export const analyzeFens = async (
 
 	const postPositionAndEval = () => {
 		postMessage(`position fen ${fens[currentIdx]}`)
-		postMessage(`go`)
+		postMessage(useBestMove ? `go depth ${depth}` : 'go')
 	}
 
 	// listen for messages from the worker
 	const messageListener = async (message: string) => {
-		onReceiveMessage(message)
-		if (message.startsWith(`info depth ${depth}`) && message.includes(" cp ")) {
+		if (finishAnalysisCondition(message)) {
 			postMessage('stop')
-			// stockfish.terminate()
-			onAnalyzeFen(currentIdx + 1,fens.length)
+			onAnalyzeFen(currentIdx + 1, numFensToAnalyze)
 			currentIdx += 1
-			if (currentIdx == fens.length) {
+			if (currentIdx == numFensToAnalyze) {
 				const endTime: Date = new Date()
 				const duration = endTime.getTime() - startTime.getTime()
-				onComplete(duration / 1000, fens.length)
+				onComplete(duration / 1000, numFensToAnalyze)
 				return;
-			} else if (currentIdx < fens.length) {
-				// stockfish = await fetchStockfish();
-				// (stockfish as any).addMessageListener(messageListener)
-				postPositionAndEval()
-				console.log(stockfish)
+			} else if (currentIdx < numFensToAnalyze) {
+				setTimeout(postPositionAndEval, 100)
 			} else {
-				console.error(`Index is greater than fens.length! ${currentIdx}`)
+				console.error(`Index is greater than numFensToAnalyze! ${currentIdx}`)
 			}
-		} else if (message.startsWith("Stockfish")) {
-			postPositionAndEval()
 		}
 	}
 
-	(stockfish as any).addMessageListener(messageListener)
+	setMessageListener(messageListener)
+
+	if (nnueEnabled) {
+		postMessage("setoption NAME Use NNUE value true")
+	}
+
+	setTimeout(() => {
+		startTime = new Date()
+		postPositionAndEval()
+	}, 1000)
 }

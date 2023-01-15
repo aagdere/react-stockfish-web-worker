@@ -1,3 +1,5 @@
+import { TypographyProps } from '@mui/system'
+
 export const reactDark = { 
   bgcolor: '#282c34',
   fontSize: '100%'
@@ -21,9 +23,26 @@ export const gridStyle = {
 
 export const inputStyle = {
   bgcolor: 'white',
+  color: 'black',
   width: '50%'
 }
 
 export const listItemStyle = {
   fontSize: '50%'
+}
+
+export const progressBarStyle = {
+  backgroundColor: 'white',
+  width: '50%'
+}
+
+export const typographyProps: TypographyProps = { 
+  //@ts-ignore
+  variant: 'subtitle2', 
+  sx: {
+      whiteSpace: 'nowrap',
+      overflow: 'visible',
+      textOverflow: 'ellipsis',
+    },
+  align: 'left'
 }

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-function LinearProgressWithLabel(props: LinearProgressProps & { value: number, sx: {width: number} }) {
+function LinearProgressWithLabel(props: {sx: { width: string, backgroundColor: string }, value: number}) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', width: props.sx.width}}>
       <Box sx={{ width: '100%', mr: 1 }}>
